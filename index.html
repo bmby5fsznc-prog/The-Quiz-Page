@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Plant Cell Organelle Quiz — Sprout Lab (Draggable Matching)</title>
+    <style>
+      :root {
+        --bg: #f3fff6;
+        --card: #ffffff;
+        --muted: #627d6a;
+        --accent: #4bb373;
+        --accent-2: #7ad29e;
+        --leaf: #2f8a4a;
+        --cute: #ffeedd;
+        --shadow: 0 6px 20px rgba(47, 138, 74, 0.08);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(
+            600px 300px at 10% 10%,
+            rgba(123, 201, 141, 0.08),
+            transparent 15%
+          ),
+          radial-gradient(
+            500px 240px at 90% 90%,
+            rgba(74, 179, 115, 0.06),
+            transparent 15%
+          ),
+          var(--bg);
+        color: #264734;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 28px auto;
+        padding: 28px;
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 20px;
+      }
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(255, 255, 255, 0.98)
+        );
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(47, 138, 74, 0.06);
+      }
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 700;
+        transform: rotate(-8deg);
+      }
+      .title {
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin-top: 2px;
+      }
+
+      .question {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 12px;
+        background: linear-gradient(
+          180deg,
+          rgba(245, 255, 249, 0.8),
+          rgba(255, 255, 255, 0.6)
+        );
+        border: 1px dashed rgba(75, 179, 115, 0.12);
+      }
+      .q-number {
+        font-weight: 700;
+        color: var(--leaf);
+        font-size: 0.95rem;
+      }
+      .q-text {
+        margin-top: 6px;
+        font-size: 1.05rem;
+      }
+      .options {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .option {
+        background: var(--card);
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid rgba(38, 71, 52, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(39, 95, 64, 0.06);
+      }
+      .option.correct {
+        border: 2px solid rgba(58, 151, 89, 0.22);
+        background: linear-gradient(
+          90deg,
+          rgba(122, 210, 158, 0.12),
+          rgba(255, 255, 255, 0)
+        );
+      }
+      .option.wrong {
+        opacity: 0.6;
+        border: 1px solid rgba(220, 80, 80, 0.06);
+        filter: grayscale(0.15);
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        gap: 12px;
+      }
+      .btn {
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        border: 0;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(75, 179, 115, 0.16);
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--leaf);
+        border: 1px solid rgba(47, 138, 74, 0.08);
+        box-shadow: none;
+      }
+
+      /* side */
+      .side {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .progress-wrap {
+        background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.95));
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(47, 138, 74, 0.06);
+      }
+      .circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 999px;
+        background: conic-gradient(var(--accent) 0% 0%, #e6f6ea 0 100%);
+        display: grid;
+        place-items: center;
+        margin: 0 auto;
+        position: relative;
+      }
+      .circle .num {
+        font-weight: 800;
+        color: var(--leaf);
+        font-size: 1.1rem;
+      }
+      .progress-meta {
+        text-align: center;
+        color: var(--muted);
+        margin-top: 8px;
+        font-size: 0.95rem;
+      }
+
+      /* matching diagram */
+      .diagram {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.96),
+          rgba(250, 255, 250, 0.98)
+        );
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(47, 138, 74, 0.06);
+        min-height: 320px;
+      }
+      .diagram h4 {
+        margin: 0 0 8px 0;
+        color: var(--leaf);
+      }
+      .match-area {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .left-box,
+      .right-box {
+        background: linear-gradient(180deg, #ffffff, #f7fff9);
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px dashed rgba(75, 179, 115, 0.07);
+        flex: 1;
+        min-height: 220px;
+      }
+      .left-box .draggable {
+        background: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 8px 0;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .left-box .draggable.dragging {
+        opacity: 0.6;
+      }
+      .right-box .dropzone {
+        background: linear-gradient(180deg, #fbfff9, #ffffff);
+        padding: 10px;
+        border-radius: 10px;
+        margin: 8px 0;
+        border: 2px dashed rgba(75, 179, 115, 0.12);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .right-box .dropzone.filled {
+        border-style: solid;
+        background: #f0fff4;
+      }
+      .right-box .dropzone .placed {
+        font-weight: 700;
+        color: var(--leaf);
+      }
+      .small-note {
+        font-size: 0.85rem;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      /* responsive */
+      @media (max-width: 980px) {
+        .wrap {
+          grid-template-columns: 1fr;
+          padding: 18px;
+        }
+        .side {
+          order: 2;
+        }
+      }
+      @media (max-width: 620px) {
+        .match-area {
+          flex-direction: column;
+        }
+        .left-box,
+        .right-box {
+          min-height: 160px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card" id="quizCard">
+        <div class="brand">
+          <div class="logo">SL</div>
+          <div>
+            <div class="title">Sprout Lab — Plant Organelle Quiz</div>
+            <div class="subtitle">
+              A slightly challenging quiz through plant cell functions 🌿
+            </div>
+          </div>
+        </div>
+
+        <div class="question" id="questionArea">
+          <div class="q-number" id="qNum">Question 1 of 7</div>
+          <div class="q-text" id="qText">Loading…</div>
+
+          <div class="options" id="optionsList">
+            <!-- options will be injected here -->
+          </div>
+
+          <div class="controls">
+            <button class="btn ghost" id="prevBtn" disabled>← Previous</button>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="btn ghost"
+                id="hintBtn"
+                title="Get a contextual hint"
+              >
+                💡 Hint
+              </button>
+              <button class="btn" id="nextBtn">Next ➜</button>
+            </div>
+          </div>
+          <div
+            style="margin-top: 10px; color: var(--muted); font-size: 0.88rem"
+          >
+            Tip: Answer to get feedback. Use the "Next" button to move on.
+            Matching diagram is on the right to drag names to definitions.
+          </div>
+        </div>
+
+        <div
+          style="margin-top: 14px; display: flex; gap: 8px; align-items: center"
+        >
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              border-radius: 10px;
+              background: linear-gradient(
+                90deg,
+                var(--accent-2),
+                var(--accent)
+              );
+              display: grid;
+              place-items: center;
+              color: white;
+              font-weight: 700;
+            "
+          >
+            🌱
+          </div>
+          <div>
+            <div style="font-weight: 700">Plant cell study session</div>
+            <div style="color: var(--muted); font-size: 0.9rem">
+              Focus: mitochondria, nucleus, ER, Golgi, ribosomes, chloroplast,
+              vacuole, cytoplasm
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            position: absolute;
+            left: -26px;
+            bottom: -34px;
+            opacity: 0.12;
+            font-size: 200px;
+            color: var(--accent-2);
+            pointer-events: none;
+            transform: rotate(-12deg);
+          "
+        >
+          🌿
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="progress-wrap">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <div style="font-weight: 800; color: var(--leaf)">Progress</div>
+              <div style="color: var(--muted); font-size: 0.9rem">
+                How many questions you've answered
+              </div>
+            </div>
+            <div style="text-align: right">
+              <div
+                style="font-weight: 700; color: var(--leaf); font-size: 1.05rem"
+                id="scoreText"
+              >
+                0 / 7 correct
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px">
+            <div class="circle" id="progressCircle" aria-hidden="true">
+              <div class="num" id="circlePct">0%</div>
+            </div>
+            <div class="progress-meta" id="progressMeta">
+              0 answered • 7 total
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram" aria-label="Matching diagram">
+          <h4>Matching: Drag organelle → correct function</h4>
+          <p style="margin: 0 0 8px 0; color: var(--muted); font-size: 0.9rem">
+            Drag the organelle names from the left column into the matching
+            function boxes on the right.
+          </p>
+
+          <div class="match-area">
+            <div class="left-box" id="leftBox">
+              <div style="font-weight: 700">Organelles</div>
+              <!-- draggable items -->
+              <div class="draggable" draggable="true" data-id="mitochondria">
+                Mitochondria
+              </div>
+              <div class="draggable" draggable="true" data-id="nucleus">
+                Nucleus
+              </div>
+              <div
+                class="draggable"
+                draggable="true"
+                data-id="endoplasmic_reticulum"
+              >
+                Endoplasmic Reticulum (ER)
+              </div>
+              <div class="draggable" draggable="true" data-id="golgi">
+                Golgi Apparatus
+              </div>
+              <div class="draggable" draggable="true" data-id="ribosomes">
+                Ribosomes
+              </div>
+              <div class="draggable" draggable="true" data-id="chloroplast">
+                Chloroplast
+              </div>
+              <div class="draggable" draggable="true" data-id="vacuole">
+                Vacuole
+              </div>
+              <div class="draggable" draggable="true" data-id="cytoplasm">
+                Cytoplasm
+              </div>
+              <div class="small-note">
+                Tip: You can move items back to this column to change answers.
+              </div>
+            </div>
+
+            <div class="right-box" id="rightBox">
+              <div style="font-weight: 700">Functions</div>
+
+              <div class="dropzone" data-accept="nucleus" data-key="1">
+                <div class="desc">
+                  Stores genetic material and controls cell activities
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="golgi" data-key="2">
+                <div class="desc">
+                  Protein modification, packaging and shipping
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="mitochondria" data-key="3">
+                <div class="desc">
+                  ATP production through cellular respiration
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div
+                class="dropzone"
+                data-accept="endoplasmic_reticulum"
+                data-key="4"
+              >
+                <div class="desc">
+                  Synthesis of lipids & protein folding (rough & smooth)
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="ribosomes" data-key="5">
+                <div class="desc">Protein synthesis from mRNA</div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="chloroplast" data-key="6">
+                <div class="desc">
+                  Site of photosynthesis; converts light energy into chemical
+                  energy (sugars)
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="vacuole" data-key="7">
+                <div class="desc">
+                  Stores water, nutrients, and helps maintain turgor pressure
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="dropzone" data-accept="cytoplasm" data-key="8">
+                <div class="desc">
+                  Fluid matrix that suspends organelles and hosts metabolic
+                  reactions
+                </div>
+                <div class="placed-area"></div>
+              </div>
+
+              <div class="small-note">
+                After placing all, click "Check Matches" to see feedback.
+              </div>
+              <div style="margin-top: 8px; display: flex; gap: 8px">
+                <button id="checkMatches" class="btn ghost" style="flex: 1">
+                  Check Matches
+                </button>
+                <button id="resetMatches" class="btn" style="flex: 1">
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* Quiz data (7 questions). One question replaced with a chloroplast question. */
+      const questions = [
+        {
+          id: 1,
+          text: "Which organelle is the cell's main energy generator, producing ATP through cellular respiration?",
+          choices: [
+            { id: "a", text: "Nucleus" },
+            { id: "b", text: "Mitochondria" },
+            { id: "c", text: "Golgi apparatus" },
+            { id: "d", text: "Vacuole" },
+          ],
+          answer: "b",
+          hint: "Think 'powerhouse' — which organelle is usually called that?",
+        },
+        {
+          id: 2,
+          text: "Which structure houses DNA and acts as the control center for gene expression?",
+          choices: [
+            { id: "a", text: "Ribosome" },
+            { id: "b", text: "Cytoplasm" },
+            { id: "c", text: "Nucleus" },
+            { id: "d", text: "Vacuole" },
+          ],
+          answer: "c",
+          hint: "Contains the nucleolus and is enclosed by a double membrane.",
+        },
+        {
+          id: 3,
+          text: "Ribosomes are responsible for which primary function?",
+          choices: [
+            { id: "a", text: "Protein synthesis from mRNA" },
+            { id: "b", text: "Packaging proteins into vesicles" },
+            { id: "c", text: "Breaking down toxic compounds" },
+            { id: "d", text: "Water storage" },
+          ],
+          answer: "a",
+          hint: "Ribosomes read mRNA and assemble amino acids into polypeptides.",
+        },
+        {
+          id: 4,
+          text: "Which organelle modifies, sorts, and ships proteins — think cellular post office?",
+          choices: [
+            { id: "a", text: "Endoplasmic reticulum" },
+            { id: "b", text: "Golgi apparatus" },
+            { id: "c", text: "Mitochondrion" },
+            { id: "d", text: "Cytoplasm" },
+          ],
+          answer: "b",
+          hint: "Often sits near the ER and receives vesicles from it.",
+        },
+        {
+          id: 5,
+          text: "The rough endoplasmic reticulum is distinct from the smooth ER because it has:",
+          choices: [
+            { id: "a", text: "Chloroplasts attached" },
+            { id: "b", text: "Ribosomes on its surface for protein synthesis" },
+            { id: "c", text: "A role in photosynthesis" },
+            { id: "d", text: "Thick cellulose walls" },
+          ],
+          answer: "b",
+          hint: "Surface-bound structures that translate proteins destined for secretion or membranes.",
+        },
+        {
+          id: 6,
+          text: "Chloroplasts are specialized for:",
+          choices: [
+            { id: "a", text: "ATP production only during respiration" },
+            { id: "b", text: "Packaging proteins for export" },
+            {
+              id: "c",
+              text: "Converting light energy into chemical energy via photosynthesis",
+            },
+            { id: "d", text: "Storing genetic material" },
+          ],
+          answer: "c",
+          hint: "They contain chlorophyll and have internal thylakoid membranes arranged in stacks called grana.",
+        },
+        {
+          id: 7,
+          text: "The cytoplasm best describes:",
+          choices: [
+            {
+              id: "a",
+              text: "The fluid matrix that suspends organelles and host many metabolic reactions",
+            },
+            {
+              id: "b",
+              text: "A membrane-bound organelle that packages proteins",
+            },
+            { id: "c", text: "The site of DNA storage" },
+            { id: "d", text: "A single enzyme complex" },
+          ],
+          answer: "a",
+          hint: "It's everything inside the plasma membrane excluding the nucleus (in eukaryotes).",
+        },
+      ];
+
+      let state = {
+        index: 0,
+        answers: Array(questions.length).fill(null), // user selected choice id or null
+        correctCount: 0,
+      };
+
+      const qNumEl = document.getElementById("qNum");
+      const qTextEl = document.getElementById("qText");
+      const optionsList = document.getElementById("optionsList");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const hintBtn = document.getElementById("hintBtn");
+      const circlePct = document.getElementById("circlePct");
+      const progressMeta = document.getElementById("progressMeta");
+      const progressCircle = document.getElementById("progressCircle");
+      const scoreText = document.getElementById("scoreText");
+
+      function renderQuestion() {
+        const q = questions[state.index];
+        qNumEl.textContent = `Question ${state.index + 1} of ${
+          questions.length
+        }`;
+        qTextEl.textContent = q.text;
+
+        optionsList.innerHTML = "";
+        q.choices.forEach((c) => {
+          const div = document.createElement("label");
+          div.className = "option";
+          div.innerHTML = `<input type="radio" name="choice" value="${c.id}"> <div style="font-weight:700;color:#264734">${c.text}</div>`;
+          // if already answered, mark correct/wrong styles
+          const user = state.answers[state.index];
+          if (user) {
+            if (c.id === q.answer) div.classList.add("correct");
+            if (user === c.id && user !== q.answer) div.classList.add("wrong");
+            div.style.cursor = "default";
+          }
+          div.addEventListener("click", () => {
+            if (state.answers[state.index]) return; // don't change after answered
+            const selected = c.id;
+            state.answers[state.index] = selected;
+            // mark styles
+            Array.from(optionsList.children).forEach((node) => {
+              node.style.cursor = "default";
+              const inp = node.querySelector("input");
+              if (inp.value === q.answer) node.classList.add("correct");
+              if (inp.value === selected && selected !== q.answer)
+                node.classList.add("wrong");
+              inp.checked = inp.value === selected;
+            });
+            // update score
+            recalcScore();
+            updateProgressUI();
+          });
+          optionsList.appendChild(div);
+        });
+
+        prevBtn.disabled = state.index === 0;
+        nextBtn.textContent =
+          state.index === questions.length - 1 ? "Finish" : "Next ➜";
+      }
+
+      function recalcScore() {
+        let c = 0;
+        state.answers.forEach((a, i) => {
+          if (a && a === questions[i].answer) c++;
+        });
+        state.correctCount = c;
+      }
+
+      function updateProgressUI() {
+        const answered = state.answers.filter((a) => a !== null).length;
+        const pct = Math.round((answered / questions.length) * 100);
+        circlePct.textContent = pct + "%";
+        // update circle conic gradient
+        progressCircle.style.background = `conic-gradient(var(--accent) 0% ${pct}%, #e6f6ea ${pct}% 100%)`;
+        progressMeta.textContent = `${answered} answered • ${questions.length} total`;
+        scoreText.textContent = `${state.correctCount} / ${questions.length} correct`;
+      }
+
+      prevBtn.addEventListener("click", () => {
+        if (state.index > 0) {
+          state.index--;
+          renderQuestion();
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (state.index < questions.length - 1) {
+          state.index++;
+          renderQuestion();
+        } else {
+          showSummary();
+        }
+      });
+
+      hintBtn.addEventListener("click", () => {
+        const q = questions[state.index];
+        alert("Hint: " + q.hint);
+      });
+
+      function showSummary() {
+        const total = questions.length;
+        const correct = state.correctCount;
+        const pct = Math.round((correct / total) * 100);
+        const message = `You answered ${correct} out of ${total} correctly (${pct}%).\n\nGreat job! Review the matching diagram to reinforce functions.`;
+        alert(message);
+      }
+
+      /* Initial render */
+      renderQuestion();
+      updateProgressUI();
+
+      /* keyboard shortcuts */
+      document.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() === "n") nextBtn.click();
+        if (e.key.toLowerCase() === "p") prevBtn.click();
+        if (e.key.toLowerCase() === "h") hintBtn.click();
+      });
+
+      /* ---------------------------
+   Drag & drop matching logic
+   --------------------------- */
+      const draggables = document.querySelectorAll(".draggable");
+      const dropzones = document.querySelectorAll(".dropzone");
+      const leftBox = document.getElementById("leftBox");
+      const checkBtn = document.getElementById("checkMatches");
+      const resetBtn = document.getElementById("resetMatches");
+
+      let dragId = null;
+      let origin = null;
+
+      draggables.forEach((d) => {
+        d.addEventListener("dragstart", (e) => {
+          dragId = d.dataset.id;
+          origin = d.parentElement;
+          d.classList.add("dragging");
+          e.dataTransfer.setData("text/plain", dragId);
+          e.dataTransfer.effectAllowed = "move";
+        });
+        d.addEventListener("dragend", () => {
+          d.classList.remove("dragging");
+          dragId = null;
+          origin = null;
+        });
+      });
+
+      /* allow drop on dropzones and leftBox */
+      [...dropzones, leftBox].forEach((zone) => {
+        zone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          zone.classList.add("over");
+        });
+        zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+        zone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          zone.classList.remove("over");
+          const id = e.dataTransfer.getData("text/plain");
+          const dragged = document.querySelector(`.draggable[data-id="${id}"]`);
+          if (!dragged) return;
+
+          // if drop on leftBox: move item back
+          if (zone === leftBox) {
+            leftBox.appendChild(dragged);
+            updateDropzoneState();
+            return;
+          }
+
+          // if drop on a dropzone: accept only one item at a time
+          const placedArea = zone.querySelector(".placed-area");
+          if (placedArea.firstChild) {
+            leftBox.appendChild(placedArea.firstChild);
+          }
+
+          // append the dragged element
+          placedArea.appendChild(dragged);
+          updateDropzoneState();
+        });
+      });
+
+      function updateDropzoneState() {
+        dropzones.forEach((z) => {
+          const placed = z.querySelector(".placed-area").firstChild;
+          if (placed) {
+            z.classList.add("filled");
+            z.querySelector(".placed-area").style.display = "flex";
+            // show placed label
+            placed.classList.remove("dragging");
+            placed.style.cursor = "grab";
+          } else {
+            z.classList.remove("filled");
+          }
+        });
+      }
+
+      /* Check matches */
+      checkBtn.addEventListener("click", () => {
+        let total = dropzones.length;
+        let correct = 0;
+        dropzones.forEach((z) => {
+          const expect = z.dataset.accept;
+          const placed = z.querySelector(".placed-area").firstChild;
+          z.style.outline = "";
+          if (!placed) {
+            z.style.outline = "2px dashed rgba(200,100,100,0.12)";
+            return;
+          }
+          const placedId = placed.dataset.id;
+          if (placedId === expect) {
+            correct++;
+            z.style.outline = "3px solid rgba(75,179,115,0.28)";
+          } else {
+            z.style.outline = "3px solid rgba(220,80,80,0.18)";
+          }
+        });
+
+        setTimeout(() => {
+          alert(`You matched ${correct} out of ${total} correctly.`);
+        }, 50);
+      });
+
+      /* Reset matching: move all draggables back left */
+      resetBtn.addEventListener("click", () => {
+        draggables.forEach((d) => leftBox.appendChild(d));
+        dropzones.forEach((z) => {
+          z.style.outline = "";
+        });
+        updateDropzoneState();
+      });
+
+      /* keyboard accessibility */
+      draggables.forEach((d) => {
+        d.setAttribute("tabindex", "0");
+        d.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!d.classList.contains("picked")) {
+              d.classList.add("picked");
+              d.style.outline = "2px solid rgba(75,179,115,0.3)";
+              document.body.dataset.picked = d.dataset.id;
+            } else {
+              d.classList.remove("picked");
+              d.style.outline = "";
+              leftBox.appendChild(d);
+              delete document.body.dataset.picked;
+              updateDropzoneState();
+            }
+          }
+        });
+      });
+
+      dropzones.forEach((z) => {
+        z.setAttribute("tabindex", "0");
+        z.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            const pickedId = document.body.dataset.picked;
+            if (!pickedId) return;
+            const pickedEl = document.querySelector(
+              `.draggable[data-id="${pickedId}"]`
+            );
+            if (!pickedEl) return;
+            const placedArea = z.querySelector(".placed-area");
+            if (placedArea.firstChild) {
+              leftBox.appendChild(placedArea.firstChild);
+            }
+            placedArea.appendChild(pickedEl);
+            pickedEl.classList.remove("picked");
+            pickedEl.style.outline = "";
+            delete document.body.dataset.picked;
+            updateDropzoneState();
+          }
+        });
+      });
+
+      /* Initial state */
+      updateDropzoneState();
+    </script>
+  </body>
+</html>
